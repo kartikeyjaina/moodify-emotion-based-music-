@@ -1,85 +1,112 @@
 import "../styles/home.scss";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Player from "../components/Player";
 import FaceExpression from "../../expression/components/FaceExpression";
 import { useSong } from "../hooks/useSong";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 const Home = () => {
-  const { handleGetSong, handleGetAllSongs } = useSong();
+  const { handleGetSong, handleGetAllSongs, setSong } = useSong();
+  const { user } = useAuth();
 
   const [songs, setSongs] = useState([]);
+  const [filteredSongs, setFilteredSongs] = useState([]);
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("discover");
 
   useEffect(() => {
     async function fetchSongs() {
       const data = await handleGetAllSongs();
       setSongs(data);
+      setFilteredSongs(data);
     }
-
     fetchSongs();
   }, []);
-  const [showCamera, setShowCamera] = useState(false);
-  const [detectedEmotion, setDetectedEmotion] = useState("");
 
-  const validEmotions = ["happy", "sad", "surprised"];
+  // 🔍 search logic
+  useEffect(() => {
+    const filtered = songs.filter((s) =>
+      s.title.toLowerCase().includes(search.toLowerCase()),
+    );
+    setFilteredSongs(filtered);
+  }, [search, songs]);
 
   return (
     <>
-      <button
-        className="button"
-        onClick={() => setShowCamera((prev) => !prev)}
-        style={{
-          position: "fixed",
-          top: "1.25rem",
-          right: "1.25rem",
-          zIndex: 200,
-        }}
-      >
-        {showCamera ? "Close Camera" : "Open Camera"}
-      </button>
+      <div className="top-bar">
+        <h1 className="logo">Moodify</h1>
 
-      {/* Camera */}
-      {showCamera && (
-        <div className="camera-popup">
-          <FaceExpression
-            onClick={(expression) => {
-              if (!expression) return;
+        {/* 🔍 SEARCH */}
+        <input
+          type="text"
+          placeholder="Search songs..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="search-top"
+        />
 
-              const mood = expression.toLowerCase();
+        <div className="user">{user?.username}</div>
+      </div>
 
-              if (!validEmotions.includes(mood)) return;
+      {/* 📌 RIGHT SIDEBAR */}
+      <div className="sidebar">
+        <button
+          className={activeTab === "discover" ? "active" : ""}
+          onClick={() => setActiveTab("discover")}
+        >
+          Discover
+        </button>
+        <button
+          className={activeTab === "scan" ? "active" : ""}
+          onClick={() => setActiveTab("scan")}
+        >
+          Scan Mood
+        </button>
+      </div>
 
-              //  show emotion on UI
-              setDetectedEmotion(expression);
+      {/* 📦 MAIN CONTENT */}
+      <div className="main-content">
+        {activeTab === "discover" && (
+          <>
+            {/* 🎵 SONG GRID */}
+            <div className="songs-grid">
+              {filteredSongs?.map((song) => (
+                <div
+                  key={song._id}
+                  className="song-card"
+                  onClick={() => setSong(song)}
+                >
+                  <img src={song.posterUrl} alt={song.title} />
+                  <p>{song.title}</p>
 
-              //  call API
-              handleGetSong({ mood });
-
-              //  wait 4 seconds then close
-              setTimeout(() => {
-                setShowCamera(false);
-                setDetectedEmotion("");
-              }, 4000);
-            }}
-          />
-        </div>
-      )}
-
-      <div className="songs-section">
-        <h2>All Songs</h2>
-
-        <div className="songs-grid">
-          {songs?.map((song) => (
-            <div
-              key={song._id}
-              className="song-card"
-              onClick={() => handleGetSong({ mood: song.mood })}
-            >
-              <img src={song.posterUrl} alt={song.title} />
-              <p>{song.title}</p>
-              
+                  <div className="play-btn">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="currentColor"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
+
+        {activeTab === "scan" && (
+          <div className="camera-wrapper">
+            <FaceExpression
+              onClick={(expression) => {
+                if (!expression) return;
+
+                const mood = expression.toLowerCase();
+                handleGetSong({ mood });
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <Player />

@@ -1,15 +1,27 @@
 @use "./button.scss";
-* {
+
+/* =========================
+   RESET
+========================= */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 html,
 body,
 #root {
   width: 100%;
-  background-color: rgb(33, 33, 33);
-  color: whitesmoke;
+  min-height: 100%;
+}
+
+/* =========================
+   BASE TYPOGRAPHY
+========================= */
+body {
   font-family:
     system-ui,
     -apple-system,
@@ -22,14 +34,128 @@ body,
     "Open Sans",
     "Helvetica Neue",
     sans-serif;
+
+  color: #f5f5f5;
+  background-color: #0b0b0b;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  overflow-x: hidden;
 }
+
+/* =========================
+   BACKGROUND LAYERS
+========================= */
+
+/* Base gradient */
+
+body {
+  background: #080808;
+  overflow-x: hidden;
+}
+
+/* Ambient glow layer */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(221, 66, 0, 0.25), transparent 35%),
+    radial-gradient(circle at 80% 30%, rgba(255, 120, 40, 0.18), transparent 40%),
+    radial-gradient(circle at 60% 80%, rgba(255, 80, 20, 0.12), transparent 50%);
+
+  filter: blur(60px);
+  opacity: 0.9;
+
+  animation: bgMove 18s ease-in-out infinite alternate;
+
+  z-index: 0;
+  pointer-events: none;
+}
+/* Subtle texture (less harsh now) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 30% 70%, rgba(255, 100, 30, 0.12), transparent 50%),
+    radial-gradient(circle at 70% 40%, rgba(221, 66, 0, 0.1), transparent 50%);
+
+  filter: blur(80px);
+  opacity: 0.7;
+
+  animation: bgMoveReverse 22s ease-in-out infinite alternate;
+
+  z-index: 0;
+  pointer-events: none;
+}
+@keyframes bgMove {
+  0% {
+    transform: translate(0%, 0%) scale(1);
+  }
+  50% {
+    transform: translate(-5%, 3%) scale(1.1);
+  }
+  100% {
+    transform: translate(5%, -3%) scale(1.05);
+  }
+}
+
+@keyframes bgMoveReverse {
+  0% {
+    transform: translate(0%, 0%) scale(1);
+  }
+  50% {
+    transform: translate(4%, -4%) scale(1.08);
+  }
+  100% {
+    transform: translate(-4%, 4%) scale(1.05);
+  }
+}
+body::after {
+  background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+  mix-blend-mode: overlay;
+  opacity: 0.05;
+}
+/* =========================
+   ROOT LAYER (APP ABOVE BG)
+========================= */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================
+   LINKS
+========================= */
 a {
   color: #dd4200;
   text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #ff6a1a;
+  }
 }
+
+/* =========================
+   CAMERA (DO NOT BREAK UI)
+========================= */
 .camera-video {
-  width: 100%;
+  width: 30%;
+  max-width: 100%;
   height: auto;
-  border-radius: 12px;
+
+  border-radius: 0.75rem;
   object-fit: cover;
+}
+
+/* =========================
+   GLOBAL SMOOTHING
+========================= */
+* {
+  backface-visibility: hidden;
 }
