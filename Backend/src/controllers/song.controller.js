@@ -45,4 +45,13 @@ async function getSong(req, res) {
     song,
   });
 }
-module.exports = { uploadSong, getSong };
+async function getAllSongs(req, res) {
+  const songs = await songModel.find();
+
+  res.status(200).json({
+    message: "all songs fetched",
+    songs,
+  });
+}
+
+module.exports = { uploadSong, getSong,getAllSongs };

@@ -10,3 +10,7 @@ export async function getSong({ mood }) {
   console.log(response);
   return response.data;
 }
+export async function getAllSongs() {
+  const response = await api.get("/api/song/all");
+  return response.data;
+}
