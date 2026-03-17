@@ -38,15 +38,17 @@ async function registerUser(req, res) {
     process.env.JWT_SECRET,
     { expiresIn: "7d" },
   );
-  res.cookie("token", token);
-  res.status(201).json({
-    message: "user created successfully",
-    user: {
-      id: user_id,
-      user: user.username,
-      email: user.email,
-    },
-  });
+  res.cookie("token", token, {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: false,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
+res.status(200).json({
+  message: "user logged in successfully",
+  user,
+});
 }
 
 async function loginUser(req, res) {
@@ -80,10 +82,17 @@ async function loginUser(req, res) {
     process.env.JWT_SECRET,
     { expiresIn: "7d" },
   );
-  res.cookie("token", token);
-  res.status(200).json({
-    message: "user logged in successfully",
-  });
+  res.cookie("token", token, {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: false,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
+res.status(200).json({
+  message: "user logged in successfully",
+  user,
+});
 }
 
 async function getMe(req, res) {

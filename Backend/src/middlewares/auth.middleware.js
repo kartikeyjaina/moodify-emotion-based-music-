@@ -12,7 +12,7 @@ async function authUser(req, res, next) {
     });
   }
   const isTokenBlacklist = await redis.get(token);
-  if (!isTokenBlacklist) {
+  if (isTokenBlacklist) {
     res.status(401).json({
       message: "invalid token",
     });
